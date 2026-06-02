@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"github.com/gocolly/colly/v2"
+)
 
 func main() {
-	fmt.Println("hello world test")
+	c := colly.NewCollector()
 }
