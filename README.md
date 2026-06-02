@@ -1,0 +1,1 @@
+# stomshop-scraper
