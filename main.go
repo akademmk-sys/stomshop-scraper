@@ -67,7 +67,13 @@ func main() {
 	})
 
 	c.Visit("https://stomshop.pro/")
-	fmt.Println(slice[0])
-	fmt.Println(slice[1])
+	for _, elem := range slice {
+		fmt.Println("============================================================", elem.Name, "============================================================")
+		fmt.Println("_____ ", elem.Link)
+		for _, subElem := range elem.sub {
+			fmt.Println("+++ ", subElem.SubName, " +++")
+			fmt.Println("____", subElem.SubLink)
+		}
+	}
 
 }
