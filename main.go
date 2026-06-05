@@ -6,6 +6,14 @@ import (
 	"github.com/gocolly/colly/v2"
 )
 
+type Product struct {
+	PName   string
+	PLink   string
+	Price   string
+	Number  string
+	Country string
+}
+
 type Category struct {
 	Name string
 	Link string
@@ -14,8 +22,7 @@ type Category struct {
 
 func (p *Category) HeaderWriter(c, l string, s []SubCategory, slice []Category) []Category {
 
-	p.Name = c
-	p.Link = l
+	p.Name, p.Link = c, l
 	slice = append(slice, Category{Name: c, Link: l, sub: s})
 	return slice
 }
@@ -28,18 +35,9 @@ type SubCategory struct {
 
 func (s *SubCategory) subHeaderWriter(c, l string, slice []SubCategory) []SubCategory {
 
-	s.SubName = c
-	s.SubLink = l
+	s.SubName, s.SubLink = c, l
 	slice = append(slice, SubCategory{SubName: c, SubLink: l})
 	return slice
-}
-
-type Product struct {
-	PName   string
-	PLink   string
-	Price   string
-	Number  string
-	Country string
 }
 
 func main() {
@@ -54,9 +52,10 @@ func main() {
 	slice := make([]Category, 0)
 
 	c.OnHTML("div.mycategory.product-thumb", func(r *colly.HTMLElement) {
-		subSlice := make([]SubCategory, 0)
 		var h Category
 		var d SubCategory
+		subSlice := make([]SubCategory, 0)
+
 		r.ForEach("div.child ul.list-unstyled li a", func(_ int, a *colly.HTMLElement) {
 			if a.Text == "показать все ...." {
 				return
@@ -66,6 +65,7 @@ func main() {
 			req.Ctx.Put("sublink", a.Attr("href"))
 			req.Do()
 		})
+
 		r.ForEach("div.child h4 a", func(_ int, a *colly.HTMLElement) {
 
 			slice = h.HeaderWriter(a.Text, a.Attr("href"), subSlice, slice)
@@ -81,11 +81,13 @@ func main() {
 			Number:  r.ChildText("span.code span"),
 			Country: r.ChildText("div.manufacturer a"),
 		}
+
 		subLink := r.Request.Ctx.Get("sublink")
-		fmt.Println("subLink:", subLink)
+
 		if subLink == "" {
 			return
 		}
+
 		for i := range slice {
 			for j := range slice[i].sub {
 				if slice[i].sub[j].SubLink == subLink {
