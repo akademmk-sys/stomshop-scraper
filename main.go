@@ -142,9 +142,8 @@ func main() {
 	t.SetCellValue("Sheet1", "E1", "Продукт")
 	t.SetCellValue("Sheet1", "F1", "Ссылка на продукт")
 	t.SetCellValue("Sheet1", "G1", "Цена")
-	t.SetCellValue("Sheet1", "H1", "Фиксированная Цена")
-	t.SetCellValue("Sheet1", "I1", "Артикул")
-	t.SetCellValue("Sheet1", "J1", "Производитель")
+	t.SetCellValue("Sheet1", "H1", "Артикул")
+	t.SetCellValue("Sheet1", "1", "Производитель")
 	row := 2
 	for i := range AllData {
 		for j := range AllData[i].SubCat {
