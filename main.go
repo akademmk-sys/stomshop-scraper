@@ -10,12 +10,11 @@ import (
 )
 
 type Product struct {
-	PName    string
-	PLink    string
-	Price    string
-	FixPrice string
-	Number   string
-	Country  string
+	PName   string
+	PLink   string
+	Price   string
+	Number  string
+	Country string
 }
 
 type Category struct {
@@ -85,17 +84,15 @@ func main() {
 		currentURL := r.Request.URL
 		baseSupCategryURl := currentURL.Scheme + "://" + currentURL.Host + currentURL.Path
 		price := r.ChildText("span.price-new b")
-		fixPrice := ""
 		if price == "" {
-			fixPrice = r.ChildText("span.price.text-muted")
+			price = r.ChildText("span.price.text-muted")
 		}
 		unit := Product{
-			PName:    r.ChildText("div.caption a"),
-			PLink:    r.ChildAttr("div.caption a", "href"),
-			Price:    price,
-			FixPrice: fixPrice,
-			Number:   r.ChildText("span.code span"),
-			Country:  r.ChildText("div.manufacturer a"),
+			PName:   r.ChildText("div.caption a"),
+			PLink:   r.ChildAttr("div.caption a", "href"),
+			Price:   price,
+			Number:  r.ChildText("span.code span"),
+			Country: r.ChildText("div.manufacturer a"),
 		}
 		for i := range AllData {
 			for j := range AllData[i].SubCat {
@@ -159,13 +156,11 @@ func main() {
 				t.SetCellValue("Sheet1", "E"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].PName)
 				t.SetCellValue("Sheet1", "F"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].PLink)
 				t.SetCellValue("Sheet1", "G"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Price)
-				t.SetCellValue("Sheet1", "H"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].FixPrice)
-				t.SetCellValue("Sheet1", "I"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Number)
-				t.SetCellValue("Sheet1", "J"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Country)
+				t.SetCellValue("Sheet1", "H"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Number)
+				t.SetCellValue("Sheet1", "I"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Country)
 				row++
 			}
 		}
 	}
-
 	t.SaveAs("testcatalog.xlsx")
 }
