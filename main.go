@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/gocolly/colly/v2"
@@ -113,22 +114,49 @@ func main() {
 			c.Visit(AllData[i].SubCat[j].SubLink)
 		}
 	}
-	for _, elem := range AllData {
-		fmt.Println("============================================================", elem.Name, "============================================================")
-		fmt.Println("_____ ", elem.Link)
-		for _, subElem := range elem.SubCat {
-			fmt.Println("+++ ", subElem.SubName, " +++")
-			fmt.Println("____", subElem.SubLink)
-			for _, l := range subElem.Products {
-				fmt.Println(l.PName, "|", l.PLink, "|", l.Price, "|", l.Number, "|", l.Country)
-			}
-		}
-	}
+	// for _, elem := range AllData {
+	// 	fmt.Println("============================================================", elem.Name, "============================================================")
+	// 	fmt.Println("_____ ", elem.Link)
+	// 	for _, subElem := range elem.SubCat {
+	// 		fmt.Println("+++ ", subElem.SubName, " +++")
+	// 		fmt.Println("____", subElem.SubLink)
+	// 		for _, l := range subElem.Products {
+	// 			fmt.Println(l.PName, "|", l.PLink, "|", l.Price, "|", l.Number, "|", l.Country)
+	// 		}
+	// 	}
+	// }
 	t := excelize.NewFile()
 	defer func() {
 		if err := t.Close(); err != nil {
 			fmt.Println(err)
 		}
 	}()
+	t.SetCellValue("Sheet1", "A1", "Категория")
+	t.SetCellValue("Sheet1", "B1", "Ссылка на категрию")
+	t.SetCellValue("Sheet1", "C1", "Подкатегория")
+	t.SetCellValue("Sheet1", "D1", "Ссылка на подкатегрию")
+	t.SetCellValue("Sheet1", "E1", "Продукт")
+	t.SetCellValue("Sheet1", "F1", "Ссылка на продукт")
+	t.SetCellValue("Sheet1", "G1", "Цена")
+	t.SetCellValue("Sheet1", "H1", "Артикул")
+	t.SetCellValue("Sheet1", "I1", "Производитель")
+	row := 2
+	for i := range AllData {
+		for j := range AllData[i].SubCat {
+			for l := range AllData[i].SubCat[j].Products {
+				t.SetCellValue("Sheet1", "A"+strconv.Itoa(row), AllData[i].Name)
+				t.SetCellValue("Sheet1", "B"+strconv.Itoa(row), AllData[i].Link)
+				t.SetCellValue("Sheet1", "C"+strconv.Itoa(row), AllData[i].SubCat[j].SubName)
+				t.SetCellValue("Sheet1", "D"+strconv.Itoa(row), AllData[i].SubCat[j].SubLink)
+				t.SetCellValue("Sheet1", "E"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].PName)
+				t.SetCellValue("Sheet1", "F"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].PLink)
+				t.SetCellValue("Sheet1", "G"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Price)
+				t.SetCellValue("Sheet1", "H"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Number)
+				t.SetCellValue("Sheet1", "I"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Country)
+				row++
+			}
+		}
+	}
 
+	t.SaveAs("testcatalog.xlsx")
 }
