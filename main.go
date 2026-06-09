@@ -10,11 +10,12 @@ import (
 )
 
 type Product struct {
-	PName   string
-	PLink   string
-	Price   string
-	Number  string
-	Country string
+	PName       string
+	PLink       string
+	Price       string
+	Number      string
+	Country     string
+	Description string
 }
 
 type Category struct {
@@ -50,8 +51,8 @@ func main() {
 
 	c.Limit(&colly.LimitRule{
 		DomainGlob:  "*",
-		Delay:       500 * time.Millisecond,
-		RandomDelay: 500 * time.Millisecond,
+		Delay:       3 * time.Second,
+		RandomDelay: 2 * time.Second,
 	})
 
 	c.OnRequest(func(r *colly.Request) {
@@ -70,14 +71,12 @@ func main() {
 				return
 			}
 			SubHaders = d.subHeaderWriter(a.Text, a.Attr("href"), SubHaders)
-
 		})
 
 		r.ForEach("div.child h4 a", func(_ int, a *colly.HTMLElement) {
 			var h Category
 			AllData = h.HeaderWriter(a.Text, a.Attr("href"), SubHaders, AllData)
 		})
-
 	})
 
 	c.OnHTML("div.row.products div.product-layout div.product-thumb", func(r *colly.HTMLElement) {
@@ -103,6 +102,25 @@ func main() {
 			}
 		}
 	})
+	c.OnHTML("#tab-description > div", func(r *colly.HTMLElement) {
+		fmt.Println("ОПИСАНИЕ СРАБОТАЛО:", r.Text)
+		currentURL := r.Request.URL
+		baseSupCategryURl := currentURL.Scheme + "://" + currentURL.Host + currentURL.Path
+		html := r.DOM.Text()
+		unit := Product{
+			Description: html,
+		}
+		for i := range AllData {
+			for j := range AllData[i].SubCat {
+				for l := range AllData[i].SubCat[j].Products {
+					if AllData[i].SubCat[j].Products[l].PLink == baseSupCategryURl {
+						AllData[i].SubCat[j].Products[l].Description = unit.Description
+					}
+				}
+			}
+		}
+
+	})
 
 	c.OnHTML("ul.pagination li.active + li a", func(h *colly.HTMLElement) {
 		c.Visit(h.Attr("href"))
@@ -118,6 +136,15 @@ func main() {
 			c.Visit(AllData[i].SubCat[j].SubLink)
 		}
 	}
+	// c.Visit(AllData[0].SubCat[0].Products[0].PLink)
+	for i := range AllData {
+		for j := range AllData[i].SubCat {
+			for l := range AllData[i].SubCat[j].Products {
+				c.Visit(AllData[i].SubCat[j].Products[l].PLink)
+			}
+
+		}
+	}
 	// for _, elem := range AllData {
 	// 	fmt.Println("============================================================", elem.Name, "============================================================")
 	// 	fmt.Println("_____ ", elem.Link)
@@ -125,7 +152,7 @@ func main() {
 	// 		fmt.Println("+++ ", subElem.SubName, " +++")
 	// 		fmt.Println("____", subElem.SubLink)
 	// 		for _, l := range subElem.Products {
-	// 			fmt.Println(l.PName, "|", l.PLink, "|", l.Price, "|", l.Number, "|", l.Country)
+	// 			fmt.Println(l.PName, "|", l.PLink, "|", l.Price, "|", l.Number, "|", l.Country, "|", l.Description)
 	// 		}
 	// 	}
 	// }
@@ -143,7 +170,8 @@ func main() {
 	t.SetCellValue("Sheet1", "F1", "Ссылка на продукт")
 	t.SetCellValue("Sheet1", "G1", "Цена")
 	t.SetCellValue("Sheet1", "H1", "Артикул")
-	t.SetCellValue("Sheet1", "1", "Производитель")
+	t.SetCellValue("Sheet1", "I1", "Производитель")
+	t.SetCellValue("Sheet1", "J1", "Описание")
 	row := 2
 	for i := range AllData {
 		for j := range AllData[i].SubCat {
@@ -157,6 +185,7 @@ func main() {
 				t.SetCellValue("Sheet1", "G"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Price)
 				t.SetCellValue("Sheet1", "H"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Number)
 				t.SetCellValue("Sheet1", "I"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Country)
+				t.SetCellValue("Sheet1", "J"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Description)
 				row++
 			}
 		}
