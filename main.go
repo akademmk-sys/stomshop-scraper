@@ -12,6 +12,7 @@ import (
 type Product struct {
 	PName       string
 	PLink       string
+	ImgLink     string
 	Price       string
 	Number      string
 	Country     string
@@ -52,7 +53,7 @@ func main() {
 	c.Limit(&colly.LimitRule{
 		DomainGlob:  "*",
 		Delay:       3 * time.Second,
-		RandomDelay: 2 * time.Second,
+		RandomDelay: 1 * time.Second,
 	})
 
 	c.OnRequest(func(r *colly.Request) {
@@ -89,6 +90,7 @@ func main() {
 		unit := Product{
 			PName:   r.ChildText("div.caption a"),
 			PLink:   r.ChildAttr("div.caption a", "href"),
+			ImgLink: r.ChildAttr("div.image a img", "src"),
 			Price:   price,
 			Number:  r.ChildText("span.code span"),
 			Country: r.ChildText("div.manufacturer a"),
@@ -105,7 +107,7 @@ func main() {
 	c.OnHTML("#tab-description > div", func(r *colly.HTMLElement) {
 		fmt.Println("ОПИСАНИЕ СРАБОТАЛО:", r.Text)
 		currentURL := r.Request.URL
-		baseSupCategryURl := currentURL.Scheme + "://" + currentURL.Host + currentURL.Path
+		ProductURl := currentURL.Scheme + "://" + currentURL.Host + currentURL.Path
 		html := r.DOM.Text()
 		unit := Product{
 			Description: html,
@@ -113,7 +115,7 @@ func main() {
 		for i := range AllData {
 			for j := range AllData[i].SubCat {
 				for l := range AllData[i].SubCat[j].Products {
-					if AllData[i].SubCat[j].Products[l].PLink == baseSupCategryURl {
+					if AllData[i].SubCat[j].Products[l].PLink == ProductURl {
 						AllData[i].SubCat[j].Products[l].Description = unit.Description
 					}
 				}
@@ -137,6 +139,7 @@ func main() {
 		}
 	}
 	// c.Visit(AllData[0].SubCat[0].Products[0].PLink)
+
 	for i := range AllData {
 		for j := range AllData[i].SubCat {
 			for l := range AllData[i].SubCat[j].Products {
@@ -145,6 +148,7 @@ func main() {
 
 		}
 	}
+
 	// for _, elem := range AllData {
 	// 	fmt.Println("============================================================", elem.Name, "============================================================")
 	// 	fmt.Println("_____ ", elem.Link)
@@ -166,12 +170,13 @@ func main() {
 	t.SetCellValue("Sheet1", "B1", "Ссылка на категрию")
 	t.SetCellValue("Sheet1", "C1", "Подкатегория")
 	t.SetCellValue("Sheet1", "D1", "Ссылка на подкатегрию")
-	t.SetCellValue("Sheet1", "E1", "Продукт")
-	t.SetCellValue("Sheet1", "F1", "Ссылка на продукт")
-	t.SetCellValue("Sheet1", "G1", "Цена")
-	t.SetCellValue("Sheet1", "H1", "Артикул")
-	t.SetCellValue("Sheet1", "I1", "Производитель")
-	t.SetCellValue("Sheet1", "J1", "Описание")
+	t.SetCellValue("Sheet1", "E1", "Товар")
+	t.SetCellValue("Sheet1", "F1", "Ссылка на товар")
+	t.SetCellValue("Sheet1", "G1", "Ссылка на картинку")
+	t.SetCellValue("Sheet1", "H1", "Цена")
+	t.SetCellValue("Sheet1", "I1", "Артикул")
+	t.SetCellValue("Sheet1", "J1", "Производитель")
+	t.SetCellValue("Sheet1", "K1", "Описание")
 	row := 2
 	for i := range AllData {
 		for j := range AllData[i].SubCat {
@@ -182,10 +187,11 @@ func main() {
 				t.SetCellValue("Sheet1", "D"+strconv.Itoa(row), AllData[i].SubCat[j].SubLink)
 				t.SetCellValue("Sheet1", "E"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].PName)
 				t.SetCellValue("Sheet1", "F"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].PLink)
-				t.SetCellValue("Sheet1", "G"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Price)
-				t.SetCellValue("Sheet1", "H"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Number)
-				t.SetCellValue("Sheet1", "I"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Country)
-				t.SetCellValue("Sheet1", "J"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Description)
+				t.SetCellValue("Sheet1", "G"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].ImgLink)
+				t.SetCellValue("Sheet1", "H"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Price)
+				t.SetCellValue("Sheet1", "I"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Number)
+				t.SetCellValue("Sheet1", "J"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Country)
+				t.SetCellValue("Sheet1", "K"+strconv.Itoa(row), AllData[i].SubCat[j].Products[l].Description)
 				row++
 			}
 		}
